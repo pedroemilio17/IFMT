@@ -1,0 +1,138 @@
+import javax.swing.*;
+import javax.swing.text.*;
+import java.awt.*;
+
+public class EditorMiniWord extends JFrame {
+
+    private JTextPane painelTexto;
+    private SimpleAttributeSet atributosAtivos;
+
+    private boolean negrito = false;
+    private boolean italico = false;
+    private boolean sublinhado = false;
+    private int alinhamento = StyleConstants.ALIGN_LEFT;
+    private Color corFonte = Color.BLACK;
+    private int tamanhoFonte = 16; // Novo: Tamanho da fonte padrão
+
+    public EditorMiniWord() {
+        setTitle("Editor de Texto");
+        setSize(700, 450);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        painelTexto = new JTextPane();
+        JScrollPane barraRolagem = new JScrollPane(painelTexto);
+
+        atributosAtivos = new SimpleAttributeSet();
+        aplicarAtributos();
+
+        painelTexto.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evento) {
+                aplicarAtributos();
+            }
+        });
+
+        JPanel painelBotoes = new JPanel();
+        painelBotoes.setLayout(new FlowLayout(FlowLayout.LEFT));
+
+        JButton botaoNegrito = new JButton("Negrito");
+        JButton botaoItalico = new JButton("Itálico");
+        JButton botaoSublinhado = new JButton("Sublinhado");
+        JButton botaoAlinharEsquerda = new JButton("Alinhar à Esquerda");
+        JButton botaoCentralizar = new JButton("Centralizar");
+        JButton botaoAlinharDireita = new JButton("Alinhar à Direita");
+        JButton botaoCor = new JButton("Mudar Cor");
+
+        Integer[] tamanhosFonte = {12, 14, 16, 18, 20, 24, 28, 32, 36};
+        JComboBox<Integer> comboTamanhoFonte = new JComboBox<>(tamanhosFonte);
+        comboTamanhoFonte.setSelectedItem(tamanhoFonte);
+
+        // Ações dos botões
+        botaoNegrito.addActionListener(e -> {
+            negrito = !negrito;
+            aplicarAtributos();
+        });
+
+        botaoItalico.addActionListener(e -> {
+            italico = !italico;
+            aplicarAtributos();
+        });
+
+        botaoSublinhado.addActionListener(e -> {
+            sublinhado = !sublinhado;
+            aplicarAtributos();
+        });
+
+        botaoAlinharEsquerda.addActionListener(e -> {
+            alinhamento = StyleConstants.ALIGN_LEFT;
+            definirAlinhamento();
+        });
+
+        botaoCentralizar.addActionListener(e -> {
+            alinhamento = StyleConstants.ALIGN_CENTER;
+            definirAlinhamento();
+        });
+
+        botaoAlinharDireita.addActionListener(e -> {
+            alinhamento = StyleConstants.ALIGN_RIGHT;
+            definirAlinhamento();
+        });
+
+        botaoCor.addActionListener(e -> {
+            Color novaCor = JColorChooser.showDialog(this, "Escolha uma Cor", corFonte);
+            if (novaCor != null) {
+                corFonte = novaCor;
+                aplicarAtributos();
+            }
+        });
+
+        // Ação do combo de tamanho de fonte
+        comboTamanhoFonte.addActionListener(e -> {
+            tamanhoFonte = (Integer) comboTamanhoFonte.getSelectedItem();
+            aplicarAtributos();
+        });
+
+        // Adiciona os botões e o combo no painel
+        painelBotoes.add(botaoNegrito);
+        painelBotoes.add(botaoItalico);
+        painelBotoes.add(botaoSublinhado);
+        painelBotoes.add(botaoAlinharEsquerda);
+        painelBotoes.add(botaoCentralizar);
+        painelBotoes.add(botaoAlinharDireita);
+        painelBotoes.add(botaoCor);
+        painelBotoes.add(new JLabel("Tamanho:"));
+        painelBotoes.add(comboTamanhoFonte);
+
+        add(painelBotoes, BorderLayout.NORTH);
+        add(barraRolagem, BorderLayout.CENTER);
+    }
+
+    private void aplicarAtributos() {
+        atributosAtivos = new SimpleAttributeSet();
+        StyleConstants.setBold(atributosAtivos, negrito);
+        StyleConstants.setItalic(atributosAtivos, italico);
+        StyleConstants.setUnderline(atributosAtivos, sublinhado);
+        StyleConstants.setForeground(atributosAtivos, corFonte);
+        StyleConstants.setFontSize(atributosAtivos, tamanhoFonte); // NOVO: Aplica tamanho da fonte
+
+        painelTexto.setCharacterAttributes(atributosAtivos, false);
+    }
+
+    private void definirAlinhamento() {
+        StyledDocument documento = painelTexto.getStyledDocument();
+        SimpleAttributeSet atributosAlinhamento = new SimpleAttributeSet();
+        StyleConstants.setAlignment(atributosAlinhamento, alinhamento);
+        documento.setParagraphAttributes(
+            painelTexto.getSelectionStart(), 
+            painelTexto.getSelectionEnd() - painelTexto.getSelectionStart(), 
+            atributosAlinhamento, 
+            false
+        );
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            new EditorMiniWord().setVisible(true);
+        });
+    }
+}
